@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">AtoomaAccelerometerPlugin</string>
+    <string name="change_from_normal_to_tilted">Change from normal to tilted</string>
+    <string name="change_from_normal_to_tilted_null">Yes</string>
+    <string name="change_from_tilted_to_normal">Change from tilted to normal</string>
+    <string name="current_status">The current macbook orientation</string>
+    <string name="module_name">Accelerometer</string>
+    <string name="tilted">Tilted</string>
+</resources>
