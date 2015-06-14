@@ -51,7 +51,7 @@ public class AccessServer extends Activity implements
 
             Intent result = new Intent();
             result.putExtra(AtoomaParams.ACTIVITY_RESULT_KEY, email);
-            sp.edit().putString("AutenticatedText", email).commit();
+            sp.edit().putString("AutenticatedText", email).apply();
             setResult(RESULT_OK, result);
             finish();
         }
@@ -91,7 +91,7 @@ public class AccessServer extends Activity implements
 
         final String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
         final SharedPreferences sp = getSharedPreferences("Prefs", Context.MODE_MULTI_PROCESS);
-        sp.edit().putString("email", email).commit();
+        sp.edit().putString("email", email).apply();
 
         new GetIdTokenTask(new ResultReceiver(null) {
             @Override
@@ -99,7 +99,7 @@ public class AccessServer extends Activity implements
                 if (resultCode == 1) {
                     Intent result = new Intent();
                     result.putExtra(AtoomaParams.ACTIVITY_RESULT_KEY, email);
-                    sp.edit().putString("AutenticatedText", email).commit();
+                    sp.edit().putString("AutenticatedText", email).apply();
                     setResult(RESULT_OK, result);
                     finish();
                 }
@@ -172,9 +172,9 @@ public class AccessServer extends Activity implements
             String idToken = "";
             try {
                 idToken = GoogleAuthUtil.getToken(getApplicationContext(), account, scopes);
-            } catch (IOException e) {
-                Log.e(TAG, "Error retrieving ID token.", e);
             } catch (GoogleAuthException e) {
+                Log.e(TAG, "Error retrieving ID token.", e);
+            } catch (IOException e) {
                 Log.e(TAG, "Error retrieving ID token.", e);
             }
             return idToken;

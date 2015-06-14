@@ -10,38 +10,33 @@ import android.util.Log;
 import com.atooma.plugin.AlarmBasedTrigger;
 import com.atooma.plugin.ParameterBundle;
 import com.atooma.plugin.Schedule;
+import com.atooma.plugin.macaccelerometer.ATOOMAACCELEROMETERMODULE;
 import com.atooma.plugin.macaccelerometer.Constants;
 import com.atooma.plugin.macaccelerometer.R;
 import com.atooma.sdk.IAtoomaService;
-
-import java.lang.reflect.Field;
 
 /**
  * Created by Gabriele on 13/06/15.
  */
 public class TR_Tilted extends AlarmBasedTrigger {
 
-    BroadcastReceiver receiver;
-    Schedule schedule;
-    private IAtoomaService service = null;
+    private static final String TAG = "TR_Tilted";
+
+    private BroadcastReceiver receiver;
+    private IAtoomaService service;
+
     private String ruleId;
     private ParameterBundle params;
-    private String mId;
+    private String moduleId;
 
-    @Override
-    public void onRevoke(String s) {
-
-    }
-
-    private static final String TAG = "TR_Tilted";
 
     public TR_Tilted(Context context, final String id, int version) {
         super(context, id, version);
 
+        moduleId = ATOOMAACCELEROMETERMODULE.MODULE_ID;
+
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Constants.CHANGE_INTENT);
-
-        final TR_Tilted ths = this;
 
         receiver = new BroadcastReceiver() {
             @Override
@@ -49,27 +44,12 @@ public class TR_Tilted extends AlarmBasedTrigger {
                 Log.i(TAG, "Received broadcast");
 
                 if (service != null) {
-                    Log.i(TAG, "Here");
-
-                    try {
-                        Field f = AlarmBasedTrigger.class.getDeclaredField("moduleId");
-                        f.setAccessible(true);
-                        mId = (String) f.get((AlarmBasedTrigger) ths);
-
-                        Log.i(TAG, "ModuleId: " + mId);
-
-                    } catch (NoSuchFieldException e) {
-                        Log.e(TAG, "No Such Field");
-                    } catch (IllegalAccessException e) {
-                        Log.e(TAG, "Illegal Access");
-                    }
-
                     int status = intent.getIntExtra("status", -1);
                     if (!(boolean)params.get("TILTED") &&
                             status > -1) {
 
                         try {
-                            service.trigger(mId, id, ruleId, params);
+                            service.trigger(moduleId, id, ruleId, params);
                         } catch (RemoteException var4) {
                             var4.printStackTrace();
                         }
@@ -104,19 +84,24 @@ public class TR_Tilted extends AlarmBasedTrigger {
     }
 
     @Override
-    public void timeout(IAtoomaService atoomaService, String ruleId, ParameterBundle parameters) throws RemoteException {
+    public void timeout(IAtoomaService atoomaService,
+                        String rId, ParameterBundle parameters) throws RemoteException {
         service = atoomaService;
-        this.ruleId = ruleId;
-        params = parameters;
+        ruleId  = rId;
+        params  = parameters;
 
         onTimeout(ruleId, parameters);
     }
 
     @Override
     public void onTimeout(String ruleId, ParameterBundle parameters) {
-        Log.i(TAG, "Ruleid: "+ ruleId);
+        Log.i(TAG, "Ruleid: " + ruleId);
 
-        //trigger(ruleId, parameters);
+    }
+
+    @Override
+    public void onRevoke(String s) {
+
     }
 
     @Override

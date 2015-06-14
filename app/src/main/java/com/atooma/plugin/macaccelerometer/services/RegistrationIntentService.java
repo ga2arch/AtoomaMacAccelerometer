@@ -6,30 +6,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.ResultReceiver;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.atooma.plugin.macaccelerometer.Constants;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.transform.Result;
 
 /**
  * Created by Gabriele on 13/06/15.
@@ -72,11 +58,15 @@ public class RegistrationIntentService extends IntentService {
             doPost(Constants.SERVER_URL, data);
 
             SharedPreferences sp = getSharedPreferences("Prefs", Context.MODE_MULTI_PROCESS);
-            sp.edit().putString("idToken", idToken).commit();
-            sp.edit().putString("gcmToken", gcmToken).commit();
-            sp.edit().putBoolean("authed", true).commit();
+            SharedPreferences.Editor spEditor = sp.edit();
 
-            receiver.send(1, new Bundle());
+            spEditor.putString("idToken", idToken);
+            spEditor.putString("gcmToken", gcmToken);
+            spEditor.putBoolean("authed", true);
+
+            spEditor.apply();
+
+            receiver.send(Constants.REGISTERED, new Bundle());
 
         } catch (IOException e) {
             Log.e(TAG, "Error");
@@ -104,8 +94,6 @@ public class RegistrationIntentService extends IntentService {
             }
         }
 
-        int responseCode = conn.getResponseCode();
-
-        return responseCode;
+        return conn.getResponseCode();
     }
 }

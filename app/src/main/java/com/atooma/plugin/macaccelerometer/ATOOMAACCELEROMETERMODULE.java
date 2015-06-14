@@ -38,6 +38,6 @@ public class ATOOMAACCELEROMETERMODULE extends Module {
     @Override
     public void clearCredentials() {
         SharedPreferences sp = getContext().getSharedPreferences("Prefs", Context.MODE_MULTI_PROCESS);
-        sp.edit().clear().commit();
+        sp.edit().clear().apply();
     }
 }

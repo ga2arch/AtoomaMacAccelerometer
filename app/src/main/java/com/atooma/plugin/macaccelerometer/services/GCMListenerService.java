@@ -1,11 +1,9 @@
 package com.atooma.plugin.macaccelerometer.services;
 
-import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.atooma.plugin.macaccelerometer.AccessServer;
 import com.atooma.plugin.macaccelerometer.Constants;
 import com.google.android.gms.gcm.GcmListenerService;
 
