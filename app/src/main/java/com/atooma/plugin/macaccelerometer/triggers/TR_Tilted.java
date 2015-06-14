@@ -4,22 +4,17 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
 
 import com.atooma.plugin.AlarmBasedTrigger;
-import com.atooma.plugin.IntentBasedTrigger;
 import com.atooma.plugin.ParameterBundle;
 import com.atooma.plugin.Schedule;
-import com.atooma.plugin.Trigger;
 import com.atooma.plugin.macaccelerometer.Constants;
 import com.atooma.plugin.macaccelerometer.R;
 import com.atooma.sdk.IAtoomaService;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 /**
  * Created by Gabriele on 13/06/15.
@@ -69,12 +64,17 @@ public class TR_Tilted extends AlarmBasedTrigger {
                         Log.e(TAG, "Illegal Access");
                     }
 
-                    try {
-                        service.trigger(mId, id, ruleId, params);
-                    } catch (RemoteException var4) {
-                        var4.printStackTrace();
-                    }
+                    int status = intent.getIntExtra("status", -1);
+                    if (!(boolean)params.get("TILTED") &&
+                            status > -1) {
 
+                        try {
+                            service.trigger(mId, id, ruleId, params);
+                        } catch (RemoteException var4) {
+                            var4.printStackTrace();
+                        }
+
+                    }
                 }
             }
         };
@@ -95,7 +95,7 @@ public class TR_Tilted extends AlarmBasedTrigger {
                 "com.atooma.plugin.macaccelerometer.AccessServer");
 
         addParameter(R.string.change_from_normal_to_tilted,
-                R.string.change_from_normal_to_tilted_null, "NORMAL_TILTED", "BOOLEAN", false, null);
+                R.string.change_from_normal_to_tilted_null, "TILTED", "BOOLEAN", false, null);
     }
 
    @Override
