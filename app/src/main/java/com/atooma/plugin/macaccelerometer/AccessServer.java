@@ -8,6 +8,7 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.View;
 
@@ -21,6 +22,8 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.plus.Plus;
 
 import java.io.IOException;
+
+import javax.xml.transform.Result;
 
 /**
  * Created by Gabriele on 13/06/15.
@@ -43,8 +46,14 @@ public class AccessServer extends Activity implements
         super.onCreate(savedInstanceState);
 
         if (checkIfAuthed()) {
-            // Show logout button
-            //finish();
+            SharedPreferences sp = getSharedPreferences("Prefs", Context.MODE_MULTI_PROCESS);
+            String email = sp.getString("email", "");
+
+            Intent result = new Intent();
+            result.putExtra(AtoomaParams.ACTIVITY_RESULT_KEY, email);
+            sp.edit().putString("AutenticatedText", email).commit();
+            setResult(RESULT_OK, result);
+            finish();
         }
 
         setContentView(R.layout.main);
@@ -80,11 +89,24 @@ public class AccessServer extends Activity implements
     public void onConnected(Bundle connectionHint) {
         mSignInClicked = false;
 
-        String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
-        SharedPreferences sp = getSharedPreferences("Prefs", Context.MODE_MULTI_PROCESS);
-        sp.edit().putString("email", email);
+        final String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
+        final SharedPreferences sp = getSharedPreferences("Prefs", Context.MODE_MULTI_PROCESS);
+        sp.edit().putString("email", email).commit();
 
-        new GetIdTokenTask().execute();
+        new GetIdTokenTask(new ResultReceiver(null) {
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                if (resultCode == 1) {
+                    Intent result = new Intent();
+                    result.putExtra(AtoomaParams.ACTIVITY_RESULT_KEY, email);
+                    sp.edit().putString("AutenticatedText", email).commit();
+                    setResult(RESULT_OK, result);
+                    finish();
+                }
+            }
+        }).execute();
+
+
     }
 
     @Override
@@ -134,6 +156,13 @@ public class AccessServer extends Activity implements
     }
 
     private class GetIdTokenTask extends AsyncTask<String, Void, String> {
+        ResultReceiver receiver;
+
+        public GetIdTokenTask(ResultReceiver receiver) {
+            super();
+
+            this.receiver = receiver;
+        }
 
         @Override
         protected String doInBackground(String... params) {
@@ -157,6 +186,7 @@ public class AccessServer extends Activity implements
 
             Intent intent = new Intent(getApplicationContext(), RegistrationIntentService.class);
             intent.putExtra("idToken", result);
+            intent.putExtra("receiver", receiver);
             startService(intent);
         }
 

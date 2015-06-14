@@ -6,4 +6,5 @@
     <string name="current_status">The current macbook orientation</string>
     <string name="module_name">Accelerometer</string>
     <string name="tilted">Tilted</string>
+    <string name="authentication">Authentication</string>
 </resources>

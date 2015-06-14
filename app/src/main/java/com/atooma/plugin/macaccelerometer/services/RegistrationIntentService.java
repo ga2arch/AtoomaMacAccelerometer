@@ -4,6 +4,8 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.os.ResultReceiver;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -26,6 +28,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.transform.Result;
 
 /**
  * Created by Gabriele on 13/06/15.
@@ -50,8 +54,9 @@ public class RegistrationIntentService extends IntentService {
                         GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
                 Log.i(TAG, "GCM Registration Token: " + gcmToken);
 
+                ResultReceiver receiver = intent.getParcelableExtra("receiver");
                 String idToken = intent.getStringExtra("idToken");
-                sendTokens(idToken, gcmToken);
+                sendTokens(idToken, gcmToken, receiver);
 
           }
         } catch (Exception e) {
@@ -60,7 +65,7 @@ public class RegistrationIntentService extends IntentService {
         // Notify UI that registration has completed, so the progress indicator can be hidden.
     }
 
-    void sendTokens(String idToken, String gcmToken) {
+    void sendTokens(String idToken, String gcmToken, ResultReceiver receiver) {
         String data = "idToken="+idToken+"&gcmToken="+gcmToken;
 
         try {
@@ -70,6 +75,8 @@ public class RegistrationIntentService extends IntentService {
             sp.edit().putString("idToken", idToken).commit();
             sp.edit().putString("gcmToken", gcmToken).commit();
             sp.edit().putBoolean("authed", true).commit();
+
+            receiver.send(1, new Bundle());
 
         } catch (IOException e) {
             Log.e(TAG, "Error");

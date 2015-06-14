@@ -28,11 +28,11 @@ public class ATOOMAACCELEROMETERMODULE extends Module {
 
     @Override
     public void defineAuth() {
-//        SharedPreferences sp = getContext().getSharedPreferences("Prefs", Context.MODE_MULTI_PROCESS);
-//        if (sp.getBoolean("authed", false))
-//            setAuthenticated(true, sp.getString("email", ""));
-//        else
-//            setAuthenticated(false, "");
+        SharedPreferences sp = getContext().getSharedPreferences("Prefs", Context.MODE_MULTI_PROCESS);
+        if (sp.getBoolean("authed", false))
+            setAuthenticated(true, sp.getString("email", ""));
+        else
+            setAuthenticated(false, "");
     }
 
     @Override
