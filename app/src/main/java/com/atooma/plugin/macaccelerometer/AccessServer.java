@@ -96,7 +96,7 @@ public class AccessServer extends Activity implements
         new GetIdTokenTask(new ResultReceiver(null) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
-                if (resultCode == 1) {
+                if (resultCode == Constants.REGISTERED) {
                     Intent result = new Intent();
                     result.putExtra(AtoomaParams.ACTIVITY_RESULT_KEY, email);
                     sp.edit().putString("AutenticatedText", email).apply();
@@ -105,8 +105,6 @@ public class AccessServer extends Activity implements
                 }
             }
         }).execute();
-
-
     }
 
     @Override
