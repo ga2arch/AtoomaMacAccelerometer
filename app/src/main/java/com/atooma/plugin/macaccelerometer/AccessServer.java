@@ -2,6 +2,7 @@ package com.atooma.plugin.macaccelerometer;
 
 import android.accounts.Account;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -11,6 +12,7 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.atooma.plugin.AtoomaParams;
 import com.atooma.plugin.macaccelerometer.services.RegistrationIntentService;
@@ -40,6 +42,7 @@ public class AccessServer extends Activity implements
     private GoogleApiClient mGoogleApiClient;
     private boolean mSignInClicked;
     private boolean mIntentInProgress;
+    private ProgressDialog progress;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,6 +59,7 @@ public class AccessServer extends Activity implements
             finish();
         }
 
+        progress = new ProgressDialog(this);
         setContentView(R.layout.main);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -100,7 +104,16 @@ public class AccessServer extends Activity implements
                     Intent result = new Intent();
                     result.putExtra(AtoomaParams.ACTIVITY_RESULT_KEY, email);
                     sp.edit().putString("AutenticatedText", email).apply();
+                    progress.dismiss();
                     setResult(RESULT_OK, result);
+                    finish();
+                }
+
+                if (resultCode == Constants.REGISTER_ERROR) {
+                    Intent result = new Intent();
+                    result.putExtra(AtoomaParams.ACTIVITY_RESULT_KEY, "Error");
+                    setResult(RESULT_CANCELED, result);
+                    progress.dismiss();
                     finish();
                 }
             }
@@ -138,19 +151,15 @@ public class AccessServer extends Activity implements
     public void onConnectionFailed(ConnectionResult result) {
         if (!mIntentInProgress) {
             if (mSignInClicked && result.hasResolution()) {
-                // The user has already clicked 'sign-in' so we attempt to resolve all
-                // errors until the user is signed in, or they cancel.
                 try {
                     result.startResolutionForResult(this, RC_SIGN_IN);
                     mIntentInProgress = true;
                 } catch (IntentSender.SendIntentException e) {
-                    // The intent was canceled before it was sent.  Return to the default
-                    // state and attempt to connect to get an updated ConnectionResult.
                     mIntentInProgress = false;
                     mGoogleApiClient.connect();
                 }
             }
-        }
+       }
     }
 
     private class GetIdTokenTask extends AsyncTask<String, Void, String> {
@@ -158,6 +167,10 @@ public class AccessServer extends Activity implements
 
         public GetIdTokenTask(ResultReceiver receiver) {
             super();
+
+            progress.setTitle("Loading");
+            progress.setMessage("Wait while loading...");
+            progress.show();
 
             this.receiver = receiver;
         }

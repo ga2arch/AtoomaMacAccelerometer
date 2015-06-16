@@ -11,5 +11,7 @@ public class Constants {
     public static final String SERVER_URL = "http://192.168.1.101:8080/tokens";
 
     public static final int REGISTERED = 1;
+    public static final int REGISTER_ERROR = 2;
+
 
 }

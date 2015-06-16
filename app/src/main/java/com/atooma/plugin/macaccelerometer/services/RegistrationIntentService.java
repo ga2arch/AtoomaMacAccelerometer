@@ -24,7 +24,6 @@ import java.net.URL;
 public class RegistrationIntentService extends IntentService {
 
     private static final String TAG = "RegIntentService";
-    private static final String[] TOPICS = {"global"};
 
     public RegistrationIntentService() {
         super(TAG);
@@ -52,22 +51,25 @@ public class RegistrationIntentService extends IntentService {
     }
 
     void sendTokens(String idToken, String gcmToken, ResultReceiver receiver) {
-        String data = "idToken="+idToken+"&gcmToken="+gcmToken;
+        String data = "id_token="+idToken+"&gcm_token="+gcmToken;
 
         try {
-            doPost(Constants.SERVER_URL, data);
+            int code = doPost(Constants.SERVER_URL, data);
 
-            SharedPreferences sp = getSharedPreferences("Prefs", Context.MODE_MULTI_PROCESS);
-            SharedPreferences.Editor spEditor = sp.edit();
+            if (code == 200) {
+                SharedPreferences sp = getSharedPreferences("Prefs", Context.MODE_MULTI_PROCESS);
+                SharedPreferences.Editor spEditor = sp.edit();
 
-            spEditor.putString("idToken", idToken);
-            spEditor.putString("gcmToken", gcmToken);
-            spEditor.putBoolean("authed", true);
+                spEditor.putString("idToken", idToken);
+                spEditor.putString("gcmToken", gcmToken);
+                spEditor.putBoolean("authed", true);
 
-            spEditor.apply();
+                spEditor.apply();
 
-            receiver.send(Constants.REGISTERED, new Bundle());
-
+                receiver.send(Constants.REGISTERED, new Bundle());
+            } else {
+                receiver.send(Constants.REGISTER_ERROR, new Bundle());
+            }
         } catch (IOException e) {
             Log.e(TAG, "Error");
         }
